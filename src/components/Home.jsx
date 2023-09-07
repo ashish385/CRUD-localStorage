@@ -13,7 +13,12 @@ const Home = () => {
     }
   });
 
-   const [todo, setTodo] = useState("");
+  let initialValue = {
+    title: "",
+    desc:''
+  }
+
+   const [formdata, setFormdata] = useState(initialValue);
    const [isEditing, setIsEditing] = useState(false);
   const [currentTodo, setCurrentTodo] = useState({});
   
@@ -22,31 +27,37 @@ const Home = () => {
   }, [todos]);
 
   function handleAddInputChange(e) {
-    setTodo(e.target.value);
+    const { name, value } = e.target;
+    setFormdata({...formdata,[name]:value});
   }
 
-   function handleEditInputChange(e) {
-     setCurrentTodo({ ...currentTodo, text: e.target.value });
+  function handleEditInputChange(e) {
+    const { name, value } = e.target;
+     setCurrentTodo({ ...currentTodo, [name]:value });
   }
   
   function handleAddFormSubmit(e) {
     e.preventDefault();
-    if (todo.trim() !== "") {
+    console.log("formdata",formdata);
+    if (formdata.title.trim() !== "" || formdata.desc.trim() !== "") {
       setTodos([
         ...todos,
         {
           id: Math.random().toString(20).substr(2),
-          text: todo.trim(),
+          title: formdata.title.trim(),
+          desc:formdata.desc.trim(),
           date: new Date(),
         },
       ]);
-    }
-    setTodo("");
+    } 
+    console.log("formdata end", formdata);
+    setFormdata(initialValue);
   }
+
 
    function handleEditFormSubmit(e) {
      e.preventDefault();
-     if (currentTodo.text.trim() !== "") {
+     if (currentTodo.title.trim() !== "" || currentTodo.desc.trim() !== "") {
        handleUpdateTodo(currentTodo.id, currentTodo);
      }
   }
@@ -66,13 +77,15 @@ const Home = () => {
     setTodos(updatedItem);
   }
 
-   function handleEditClick(todo) {
+  function handleEditClick(data) {
+     console.log("todo", data);
      setIsEditing(true);
-     setCurrentTodo({ ...todo });
+    setCurrentTodo({ ...data });
+    console.log(currentTodo);
    }
 
   return (
-    <div>
+    <div className="w-full h-auto mb-5">
       {isEditing ? (
         <EditForm
           currentTodo={currentTodo}
@@ -82,31 +95,30 @@ const Home = () => {
         />
       ) : (
         <AddTodoForm
-          todo={todo}
+          formdata={formdata}
           onAddInputChange={handleAddInputChange}
           onAddFormSubmit={handleAddFormSubmit}
         />
       )}
 
       <div className="w-11/12 flex flex-col mx-auto mt-5">
-        <div className='text-center font-bold text-3xl pb-2 '>Task List</div>
+        <div className="text-center font-bold text-3xl pb-2 ">Task List</div>
         <div className="w-full flex flex-row justify-around rounded-lg border bg-slate-100  text-lg font-bold ">
-          <div className="py-2 w-1/2 text-center">Name</div>
+          <div className="py-2 w-1/2 text-center">Title</div>
+          <div className="py-2 w-1/2 text-center border-l">Description</div>
           <div className="py-2 w-1/2 text-center border-l">Action</div>
         </div>
         <div className="w-full flex flex-col justify-around rounded-lg  bg-slate-100  text-md font-semibold  ">
-          {todos.map((todo, index) => (
+          {todos.map((data, index) => (
             <TodoItem
               key={index}
-              todo={todo}
+              formdata={data}
               onEditClick={handleEditClick}
               onDeleteClick={handleDeleteClick}
             />
           ))}
         </div>
       </div>
-
-      
     </div>
   );
 }
